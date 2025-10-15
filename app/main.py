@@ -25,4 +25,4 @@ def add_post(post: Post):
     }
     id_counter += 1
     posts.append(row)
-    return ""
+    return "row"

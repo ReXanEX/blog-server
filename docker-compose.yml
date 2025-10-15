@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16.10-alpine3.22
+    container_name: blog_db
+    environment:
+      POSTGRES_USER: blog_user
+      POSTGRES_PASSWORD: blog_password
+      POSTGRES_DB: blog
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bloguser -d blogdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: blog_app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://blog_user:blog_password@db:5432/blog
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
