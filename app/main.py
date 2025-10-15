@@ -1,28 +1,23 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
 
+import models
+from database import get_db, engine
+from schemas import PostCreate
+
+# Create tables at the first start
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-id_counter = 1
-posts = []
-
-class Post(BaseModel):
-    title: str
-    content: str
-
 @app.get("/posts")
-def get_posts():
-    return posts
+def get_posts(db: Session = Depends(get_db)):
+    return db.query(models.Post).all()
 
 @app.post("/posts")
-def add_post(post: Post):
-    global id_counter
-    row = {
-           "id": id_counter,
-           "title": post.title,
-           "content": post.content
-    }
-    id_counter += 1
-    posts.append(row)
-    return "row"
+def add_post(post: PostCreate, db: Session = Depends(get_db)):
+    db_post = models.Post(title=post.title, content=post.content)
+    db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+    return "db_post"
