@@ -1,0 +1,42 @@
+name: Build and Deploy Docker Image
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      # Rep clone
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # build images
+      - name: Build Docker image
+        run: docker build -t blog-server:latest .
+
+      # images to tar
+      - name: Save Docker image as tar
+        run: docker save blog-server:latest -o blog-server.tar
+
+      # scp tar to server
+      - name: Copy image tarball to remote server
+        run: scp -P ${{ secrets.SSH_PORT }} blog-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/blog-server.tar
+
+      # open tar, deploy app
+      - name: Deploy on remote server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker load -i /tmp/blog-server.tar
+            cd ~/blog-server
+            docker-compose down
+            docker-compose up -d
+            docker system prune -f
