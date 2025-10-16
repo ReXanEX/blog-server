@@ -26,7 +26,7 @@ jobs:
       - name: Copy image tarball to remote server
         run: scp -P ${{ secrets.SSH_PORT }} blog-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/blog-server.tar
 
-      # open tar, deploy app
+      # Open tar, deploy app
       - name: Deploy on remote server
         uses: appleboy/ssh-action@v1.0.3
         with:
