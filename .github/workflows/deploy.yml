@@ -33,11 +33,23 @@ jobs:
       - name: Add server to known_hosts
         run: ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # 6. Copy the tar file with the Docker image to the remote server using scp
+      # 6. Create necessary directories on the server for logs and compose file
+      - name: Create app directories on server
+        run: ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ~/blog-server/logs/app ~/blog-server/logs/postgres"
+
+      # 7. Copy the docker-compose.yml file to the server
+      - name: Copy docker-compose.yml to server
+        run: scp -P ${{ secrets.SSH_PORT }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/docker-compose.yml
+
+      # 8. Copy the logs directory to the server
+      - name: Copy logs folder to server
+        run: scp -P ${{ secrets.SSH_PORT }} -r logs ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/
+
+      # 9. Copy the Docker image tarball to the remote server using scp
       - name: Copy image tarball to remote server
         run: scp -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=yes blog-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/blog-server.tar
 
-      # 7. Connect to the remote server and deploy the app (load image, restart containers)
+      # 10. Connect to the remote server and deploy the app (load image, restart containers)
       - name: Deploy on remote server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -48,11 +60,11 @@ jobs:
           script: |
             docker load -i /tmp/blog-server.tar
             cd ~/blog-server
-            docker-compose down
-            docker-compose up -d
+            docker compose down
+            docker compose up -d
             docker system prune -f
 
-      # 8. Remove private key and sensitive data from runner for security
+      # 11. Remove private key and sensitive data from runner for security
       - name: Cleanup
         if: always()
         run: rm -rf ~/.ssh
