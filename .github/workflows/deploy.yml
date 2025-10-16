@@ -43,7 +43,7 @@ jobs:
 
       # 8. Copy the logs directory to the server
       - name: Copy logs folder to server
-        run: scp -P ${{ secrets.SSH_PORT }} -r logs ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/
+        run: scp -P ${{ secrets.SSH_PORT }} -r blog-server/logs ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/
 
       # 9. Copy the Docker image tarball to the remote server using scp
       - name: Copy image tarball to remote server
