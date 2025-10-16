@@ -42,7 +42,7 @@ jobs:
         run: scp -P ${{ secrets.SSH_PORT }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/docker-compose.yml
 
       - name: Show repo structure for debugging
-        run: ls -la blog-server
+        run: ls -la
 
       # 8. Copy the logs directory to the server
       - name: Copy logs folder to server
