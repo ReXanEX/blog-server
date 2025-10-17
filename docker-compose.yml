@@ -30,18 +30,17 @@ services:
       retries: 5
 
   web:
-    build: .
     container_name: blog_app
+    image: blog-server:latest
+    restart: always
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://blog_user:blog_password@db:5432/blog
-    volumes:
-      - ./logs/app:/app/logs/app
     depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/blogdb
+    volumes:
+      - ./logs/app:/var/log/app
 
 volumes:
   postgres-data:
