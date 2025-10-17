@@ -40,7 +40,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/blogdb
     volumes:
-      - ./logs/app:/var/log/app
+      - ./logs/app:/app/logs/app
 
 volumes:
   postgres-data:
