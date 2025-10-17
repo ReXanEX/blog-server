@@ -10,46 +10,38 @@ jobs:
     runs-on: ubuntu-22.04 # Use Ubuntu 22.04 runner
 
     steps:
-      # 1. Clone the repository
+      # Clone the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Build Docker image from source code
+      # Build Docker image from source code
       - name: Build Docker image
         run: docker build -t blog-server:latest .
 
-      # 3. Save the built Docker image to a tar file
+      # Save the built Docker image to a tar file
       - name: Save Docker image as tar
         run: docker save blog-server:latest -o blog-server.tar
 
-      # 4. Prepare SSH key for scp (copy private key from secrets to correct location)
+      # Prepare SSH key for scp (copy private key from secrets to correct location)
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      # 5. Add the server to known_hosts (required to avoid host key verification errors)
+      # Add the server to known_hosts (required to avoid host key verification errors)
       - name: Add server to known_hosts
         run: ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # 6. Create necessary directories on the server for logs and compose file
-      - name: Create app directories on server
-        run: tree
-
-      # 7. Copy the docker-compose.yml file to the server
+      # Copy the docker-compose.yml file to the server
       - name: Copy docker-compose.yml to server
         run: scp -P ${{ secrets.SSH_PORT }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/docker-compose.yml
 
-      # 8. Debug - show repository structure
-      - name: Show repo structure for debugging
-        run: ls -la
-
-      # 9. Copy the Docker image tarball to the remote server using scp
+      # Copy the Docker image tarball to the remote server using scp
       - name: Copy image tarball to remote server
         run: scp -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=yes blog-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/blog-server.tar
 
-      # 10. Connect to the remote server and deploy the app (load image, restart containers)
+      # Connect to the remote server and deploy the app (load image, restart containers)
       - name: Deploy on remote server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -64,7 +56,7 @@ jobs:
             docker compose up -d
             docker system prune -f
 
-      # 11. Remove private key and sensitive data from runner for security
+      # Remove private key and sensitive data from runner for security
       - name: Cleanup
         if: always()
         run: rm -rf ~/.ssh

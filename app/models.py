@@ -1,3 +1,4 @@
+# This file declares the ORM models for the application
 from sqlalchemy import Column, Integer, String, Text
 from database import Base
 

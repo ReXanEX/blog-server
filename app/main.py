@@ -1,3 +1,4 @@
+# This file contains the FastAPI application with endpoints
 import logging
 from typing import List
 from fastapi import FastAPI, Depends
@@ -7,6 +8,7 @@ import models
 from database import get_db, engine
 from schemas import PostCreate, PostResponse
 
+#Configure logging
 logging.basicConfig(
     filename="/app/logs/app/app.log",
     level=logging.INFO,
@@ -15,7 +17,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Create tables at the first start
+# Create database tables on startup if they do not exist
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
