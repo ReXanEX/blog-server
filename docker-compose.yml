@@ -11,18 +11,13 @@ services:
       - ./logs/postgres:/var/log/postgresql
     ports:
       - "5432:5432"
-    command:
-      - postgres
-      - -c
-      - logging_collector=on
-      - -c
-      - log_directory=/var/log/postgresql
-      - -c
-      - log_filename=postgresql.log
-      - -c
-      - log_statement=all
-      - -c
-      - log_min_duration_statement=0
+    command: >
+      postgres
+      -c logging_collector=on
+      -c log_directory=/var/log/postgresql
+      -c log_filename=postgresql.log
+      -c log_statement=all
+      -c log_min_duration_statement=0
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U blog_user -d blog" ]
       interval: 10s
