@@ -41,12 +41,9 @@ jobs:
       - name: Copy docker-compose.yml to server
         run: scp -P ${{ secrets.SSH_PORT }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/docker-compose.yml
 
+      # 8. Debug - show repository structure
       - name: Show repo structure for debugging
         run: ls -la
-
-      # 8. Copy the logs directory to the server
-      - name: Copy logs folder to server
-        run: scp -P ${{ secrets.SSH_PORT }} -r blog-server/logs ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/blog-server/
 
       # 9. Copy the Docker image tarball to the remote server using scp
       - name: Copy image tarball to remote server
